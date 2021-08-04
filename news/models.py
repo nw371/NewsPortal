@@ -5,25 +5,16 @@ class Authors(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     authors_rating = models.IntegerField(default=0)
 
+    def update_rating(self):
+        #отфильтровываем все посты авотра и тянем рейтинги постов и умножаем на 3
+        #отфильтровываем все коменты авотра и тянем их рейтинги
+        #отфильтровываем все коменты к статьям автора и тянем их рейтинги
+        #всё это суммируем
+        #сохраняем в рейтинг автора
+        pass
+
 class Category(models.Model):
-    microelectronics = 'ME'
-    robotics = 'RO'
-    industry4 = 'I4'
-    software = 'Sw'
-    other = 'GR'
-    Category_CHOICES = [
-        (microelectronics, 'Микроэлектроника'),
-        (robotics, 'Робототехника'),
-        (industry4, 'Индустрия 4.0'),
-        (software, 'Программное обеспечение'),
-        (other, 'Разное'),
-    ]
-    category_name = models.CharField(
-        max_length=2,
-        choices=Category_CHOICES,
-        default=other,
-        unique=True,
-    )
+    category_name = models.CharField(max_length=32, default='Категория без названия')
 
 class Post(models.Model):
     #связь «один ко многим» с моделью Author;
@@ -40,6 +31,17 @@ class Post(models.Model):
     post_body = models.TextField(default='Пустое сообщение')
     # рейтинг статьи/новости.
     post_rating = models.IntegerField(default=0)
+
+    def preview(self):
+        post_preview = self.post_body[:124]+"..."
+        return post_preview
+
+    def like(self):
+        self.post_rating += 1
+        self.save()
+    def dislike(self):
+        self.post_rating -= 1
+        self.save()
 
 class PostCategory(models.Model):
     # связь «один ко многим» с моделью Post;
@@ -59,3 +61,23 @@ class Comment(models.Model):
     time_of_comment = models.DateTimeField(auto_now_add=True)
     # рейтинг комментария.
     rating_of_comment = models.IntegerField(default=0)
+
+    def like(self):
+        self.rating_of_comment += 1
+        self.save()
+    def dislike(self):
+        self.rating_of_comment -= 1
+        self.save()
+
+# SHELL COMMANDS
+# >>> from django.contrib.auth.models import User
+# >>> user1 = User.objects.create_user(username="User Name 1", password="UN1pass")
+# >>> user2 = User.objects.create_user(username="User Name 2", password="UN2pass")
+# >>> from news.models import Authors
+# >>> author1 = Authors.objects.create(author=user1)
+# >>> author2 = Authors.objects.create(author=user2)
+# >>> from news.models import Category
+# >>> cat1 = Category.objects.create(category_name='Микроэлектроника')
+# >>> cat2 = Category.objects.create(category_name='Робототехника')
+# >>> cat3 = Category.objects.create(category_name='Софт')
+# >>> cat4 = Category.objects.create(category_name='Промышленность 4.0')
